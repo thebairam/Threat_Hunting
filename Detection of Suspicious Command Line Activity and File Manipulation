@@ -1,0 +1,37 @@
+title: Detection of Suspicious Command Line Activity and File Manipulation
+id: 97507629-58d0-402d-874f-9c7954c38c2c
+description: Detects suspicious CMD command sequences involving execution of .lnk files, directory creation, file downloading with curl.exe, COM object registration using regsvr32, and network connectivity checks via ping. These behaviors could indicate a malware infection or unauthorized system access.
+author: Bairam Mamedov
+status: experimental
+date: 2024/03/08
+references:
+- https://www.qomplx.com/blog/qomplx-detecting-suspicious-use-regsvr32/
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection1:
+    CommandLine|contains:
+    - cmd.exe
+    - .lnk
+  selection2:
+    CommandLine|contains|all:
+    - cmd.exe
+    - echo
+    - MD
+  selection3:
+    CommandLine|contains:
+    - curl
+    - output
+  selection4:
+    CommandLine|contains|all:
+    - regsvr32
+    - ping
+  condition: selection1 or selection2 and selection3 and selection4
+falsepositives:
+- Legitimate use of command-line tools for administrative purposes.
+tags:
+- execution
+- malware
+- persistence
+level: high
