@@ -1,0 +1,51 @@
+title: "Detection of Suspicious File Execution and Scripting Activity"
+id: 921046c4-f90c-47a5-b59d-3b6cc3876d10
+description: "Detects potential malicious activities involving .xls, .js, .dll, .cpl, and MSI package executions similar to described IOCs"
+author: Bairam Mamedov
+status: "experimental"
+references:
+- "https://unit42.paloaltonetworks.com/matanbuchus-malware-as-a-service/"
+logsource:
+  product: "windows"
+  service: "sysmon"
+detection:
+    selection1:
+        Image:
+            - '*\EXCEL.EXE'
+        CommandLine:
+            - '*\AppData\Local\Temp\*.xlsx'
+    selection2:
+        Image:
+            - '*\WScript.exe'
+        CommandLine:
+            - '*\\*\share\*.js'
+    selection3:
+        Image:
+            - '*\control.exe'
+            - '*\rundll32.exe'
+        CommandLine:
+            - '*\AppData\Local\Temp\*.cpl'
+    selection4:
+        Image:
+            - '*\rundll32.exe'
+        CommandLine:
+            - 'Shell32.dll,Control_RunDLL *\AppData\Local\Temp\*.cpl'
+            - '*\SysWOW64\shell32.dll,#44 *\AppData\Local\Temp\*.cpl'
+    selection5:
+        Image:
+            - '*\rundll32.exe'
+        CommandLine:
+            - '*.dll,DllUnregisterServer'
+    selection6:
+        Image:
+            - '*\msiexec.exe'
+        CommandLine:
+            - '-z *\Favorites\*.msp'
+    condition: selection1 or selection2 or selection3 or selection4 or selection5 or selection6
+falsepositives:
+    - Legitimate administrative activities involving these commands and file types.
+tags:
+   - execution
+   - T1204
+   - T1059
+level: high
